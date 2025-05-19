@@ -8,6 +8,8 @@ $conn = connectDB();
 $message = '';
 $error = '';
 
+// 排序功能已移除
+
 // 处理删除请求
 if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
     $id = intval($_GET['id']);
@@ -52,6 +54,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id']))
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'] ?? '';
     $identifier = $_POST['identifier'] ?? '';
+    $sort_order = isset($_POST['sort_order']) ? intval($_POST['sort_order']) : 0;
     
     // 验证输入
     if (empty($name) || empty($identifier)) {
@@ -68,18 +71,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = "标识符'{$identifier}'已存在，请使用其他标识符";
         } else {
             // 添加新分类
-            if (!isset($_POST['id'])) {
-                $stmt = $conn->prepare("INSERT INTO categories (name, identifier) VALUES (?, ?)");
-                $stmt->bind_param("ss", $name, $identifier);
-                
-                if ($stmt->execute()) {
-                    $message = "分类已成功添加";
-                    // 重定向到分类列表
-                    header("Location: categories.php?success=added");
-                    exit;
-                } else {
-                    $error = "添加失败: " . $conn->error;
-                }
+                if (!isset($_POST['id'])) {
+                    $stmt = $conn->prepare("INSERT INTO categories (name, identifier, sort_order) VALUES (?, ?, ?)");
+                    $stmt->bind_param("ssi", $name, $identifier, $sort_order);
+                    
+                    if ($stmt->execute()) {
+                        $message = "分类已成功添加";
+                        // 重定向到分类列表
+                        header("Location: categories.php?success=added");
+                        exit;
+                    } else {
+                        $error = "添加失败: " . $conn->error;
+                    }
             } 
             // 更新现有分类
             else {
@@ -96,8 +99,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($category && $category['identifier'] == 'all' && $identifier != 'all') {
                     $error = "不能修改'全部'分类的标识符，它是系统必需的";
                 } else {
-                    $stmt = $conn->prepare("UPDATE categories SET name = ?, identifier = ? WHERE id = ?");
-                    $stmt->bind_param("ssi", $name, $identifier, $id);
+                    $stmt = $conn->prepare("UPDATE categories SET name = ?, identifier = ?, sort_order = ? WHERE id = ?");
+                    $stmt->bind_param("ssii", $name, $identifier, $sort_order, $id);
                     
                     if ($stmt->execute()) {
                         $message = "分类已成功更新";
@@ -134,7 +137,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'edit' && isset($_GET['id'])) {
 
 // 获取所有分类
 $categories = [];
-$categoryResult = $conn->query("SELECT c.*, (SELECT COUNT(*) FROM websites WHERE category_id = c.id) as website_count FROM categories c ORDER BY c.name");
+$categoryResult = $conn->query("SELECT c.*, (SELECT COUNT(*) FROM websites WHERE category_id = c.id) as website_count FROM categories c ORDER BY c.sort_order, c.name");
 while ($row = $categoryResult->fetch_assoc()) {
     $categories[] = $row;
 }
@@ -238,6 +241,12 @@ $conn->close();
                                         <small class="form-text text-danger">"all"是系统保留标识符，不能修改</small>
                                     <?php endif; ?>
                                 </div>
+                                
+                                <div class="form-group">
+                                    <label for="sort_order" class="form-label">排序顺序</label>
+                                    <input type="number" class="form-control" id="sort_order" name="sort_order" value="<?php echo $editCategory ? intval($editCategory['sort_order']) : '0'; ?>">
+                                    <small class="form-text text-muted">数字越小排序越靠前，默认为0</small>
+                                </div>
 
                                 <div class="form-group">
                                     <button type="submit" class="btn btn-primary"><?php echo $_GET['action'] == 'add' ? '添加分类' : '保存修改'; ?></button>
@@ -263,6 +272,7 @@ $conn->close();
                                             <th>ID</th>
                                             <th>名称</th>
                                             <th>标识符</th>
+                                            <th>排序顺序</th>
                                             <th>网站数量</th>
                                             <th>操作</th>
                                         </tr>
@@ -279,6 +289,7 @@ $conn->close();
                                                             <span class="badge bg-info">系统</span>
                                                         <?php endif; ?>
                                                     </td>
+                                                    <td><?php echo $category['sort_order']; ?></td>
                                                     <td>
                                                         <span class="category-count"><?php echo $category['website_count']; ?></span>
                                                         <?php if ($category['website_count'] > 0): ?>
@@ -286,18 +297,20 @@ $conn->close();
                                                         <?php endif; ?>
                                                     </td>
                                                     <td class="action-buttons">
-                                                        <a href="categories.php?action=edit&id=<?php echo $category['id']; ?>" class="btn btn-warning btn-sm">
-                                                            <i class="bi bi-pencil"></i> 编辑
-                                                        </a>
-                                                        <?php if ($category['identifier'] != 'all'): ?>
-                                                            <a href="categories.php?action=delete&id=<?php echo $category['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('确定要删除此分类吗？<?php echo $category['website_count'] > 0 ? '\n注意：此分类下有'.$category['website_count'].'个网站，需要先移除或重新分类这些网站。' : ''; ?>')">
-                                                                <i class="bi bi-trash"></i> 删除
+                                                        <div class="btn-group">
+                                                            <a href="categories.php?action=edit&id=<?php echo $category['id']; ?>" class="btn btn-warning btn-sm">
+                                                                <i class="bi bi-pencil"></i> 编辑
                                                             </a>
-                                                        <?php else: ?>
-                                                            <button class="btn btn-danger btn-sm" disabled title="系统分类不能删除">
-                                                                <i class="bi bi-trash"></i> 删除
-                                                            </button>
-                                                        <?php endif; ?>
+                                                            <?php if ($category['identifier'] != 'all'): ?>
+                                                                <a href="categories.php?action=delete&id=<?php echo $category['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('确定要删除此分类吗？<?php echo $category['website_count'] > 0 ? '\n注意：此分类下有'.$category['website_count'].'个网站，需要先移除或重新分类这些网站。' : ''; ?>')">
+                                                                    <i class="bi bi-trash"></i> 删除
+                                                                </a>
+                                                            <?php else: ?>
+                                                                <button class="btn btn-danger btn-sm" disabled title="系统分类不能删除">
+                                                                    <i class="bi bi-trash"></i> 删除
+                                                                </button>
+                                                            <?php endif; ?>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             <?php endforeach; ?>
@@ -317,5 +330,16 @@ $conn->close();
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .category-item {
+            transition: background-color 0.3s;
+        }
+        .category-item:hover {
+            background-color: #f8f9fa;
+        }
+        .action-buttons .btn-group {
+            display: flex;
+        }
+    </style>
 </body>
 </html>
