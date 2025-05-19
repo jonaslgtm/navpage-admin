@@ -30,7 +30,7 @@
 
 1. 将项目文件上传到您的Web服务器
 2. 创建MySQL数据库
-3. 导入`database.sql`文件到您的数据库
+3. 导入`/db/database.sql`文件到您的数据库
 4. 修改`config.php`文件中的数据库连接信息：
    ```php
    // 数据库配置
