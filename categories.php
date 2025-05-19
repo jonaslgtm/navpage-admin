@@ -297,7 +297,7 @@ $conn->close();
                                                         <?php endif; ?>
                                                     </td>
                                                     <td class="action-buttons">
-                                                        <div class="btn-group">
+                                                        
                                                             <a href="categories.php?action=edit&id=<?php echo $category['id']; ?>" class="btn btn-warning btn-sm">
                                                                 <i class="bi bi-pencil"></i> 编辑
                                                             </a>
@@ -310,7 +310,7 @@ $conn->close();
                                                                     <i class="bi bi-trash"></i> 删除
                                                                 </button>
                                                             <?php endif; ?>
-                                                        </div>
+                                                       
                                                     </td>
                                                 </tr>
                                             <?php endforeach; ?>
