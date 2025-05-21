@@ -1,5 +1,5 @@
 <?php
-require_once 'config.php';
+require_once '../include/config.php';
 
 // 如果已登录，重定向到仪表盘
 if (isLoggedIn()) {

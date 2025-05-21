@@ -1,5 +1,5 @@
 <?php
-require_once 'config.php';
+require_once '../include/config.php';
 
 // 清除所有会话变量
 $_SESSION = array();

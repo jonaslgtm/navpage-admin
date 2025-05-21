@@ -1,5 +1,5 @@
 <?php
-require_once 'config.php';
+require_once '../include/config.php';
 
 // 检查用户是否已登录
 requireLogin();
@@ -26,33 +26,7 @@ requireLogin();
 
     <div class="container-fluid">
         <div class="row">
-            <!-- 侧边栏 -->
-            <nav id="sidebarMenu" class="sidebar">
-                <div class="sidebar-sticky">
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link" href="dashboard.php">
-                                <i class="bi bi-speedometer2"></i> 仪表盘
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="websites.php">
-                                <i class="bi bi-globe"></i> 网站管理
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="categories.php">
-                                <i class="bi bi-tags"></i> 分类管理
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="api-docs.php">
-                                <i class="bi bi-code-slash"></i> API接口
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
+            <?php include_once 'include/sidebar.php'; ?>
 
             <!-- 主内容区域 -->
             <main role="main">
@@ -67,14 +41,14 @@ requireLogin();
                     </div>
                     <div class="card-body">
                         <p>网站导航管理系统提供了RESTful API接口，允许前端应用获取网站导航数据。所有API接口都使用GET请求方式，并返回JSON格式的数据。</p>
-                        <p>API基础URL：<code><?php echo (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']); ?>/api.php</code></p>
+                        <p>API基础URL：<code><?php echo (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . $_SERVER['HTTP_HOST']; ?>/api.php</code></p>
                         <p>所有API响应都遵循以下格式：</p>
                         <pre>{
   "code": 1,  // 1表示成功，0表示失败
   "data": []  // 返回的数据
 }</pre>
                     
-<p><a href="/api-test.php"> API接口测试 </a></p>
+<p><a href="api-test.php"> API接口测试 </a></p>
 
 </div>
                 </div>

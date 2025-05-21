@@ -1,5 +1,5 @@
 <?php
-require_once 'config.php';
+require_once '../include/config.php';
 
 // 检查用户是否已登录
 requireLogin();
@@ -27,37 +27,7 @@ requireLogin();
 
     <div class="container-fluid">
         <div class="row">
-            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse">
-                <div class="sidebar-sticky pt-3">
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link" href="dashboard.php">
-                                <i class="bi bi-speedometer2"></i> 仪表盘
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="websites.php">
-                                <i class="bi bi-globe"></i> 网站管理
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="categories.php">
-                                <i class="bi bi-tags"></i> 分类管理
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="api-docs.php">
-                                <i class="bi bi-code-slash"></i> API接口
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="api-test.php">
-                                <i class="bi bi-lightning"></i> API测试
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
+            <?php include_once 'include/sidebar.php'; ?>
 
             <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
                 <div class="page-header">
@@ -135,7 +105,7 @@ requireLogin();
                 e.preventDefault();
                 
                 const endpoint = apiEndpoint.value;
-                let url = `api.php?action=${endpoint}`;
+                let url = `/api.php?action=${endpoint}`;
                 
                 // 如果是获取网站列表且指定了分类
                 if (endpoint === 'get_websites' && document.getElementById('category').value) {
