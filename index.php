@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($result->num_rows === 1) {
             $user = $result->fetch_assoc();
             
-            // 验证密码 (使用password_verify函数验证哈希密码)
+            // 验证密码 (使用password_verify函数验证哈希密码1)
             if (password_verify($password, $user['password'])) {
                 // 登录成功，设置会话
                 $_SESSION['user_id'] = $user['id'];
